@@ -62,7 +62,7 @@ class Product extends Model
     protected function formattedPrice(): Attribute
     {
         return Attribute::make(
-            get: fn () => '$' . number_format((float) $this->price, 2),
+            get: fn () => '$'.number_format((float) $this->price, 2),
         );
     }
 
