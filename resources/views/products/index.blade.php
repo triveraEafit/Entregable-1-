@@ -10,6 +10,30 @@
         <button type="submit">Buscar</button>
     </form>
 
+    <form action="{{ route('products.filter') }}" method="GET">
+        <label>Categoría</label>
+        <select name="category_id">
+            <option value="">Todas</option>
+            @foreach ($categories ?? [] as $category)
+                <option value="{{ $category->getId() }}" @selected(($selectedCategoryId ?? null) === $category->getId())>
+                    {{ $category->getName() }}
+                </option>
+            @endforeach
+        </select>
+
+        <label>Marca</label>
+        <select name="brand_id">
+            <option value="">Todas</option>
+            @foreach ($brands ?? [] as $brand)
+                <option value="{{ $brand->getId() }}" @selected(($selectedBrandId ?? null) === $brand->getId())>
+                    {{ $brand->getName() }}
+                </option>
+            @endforeach
+        </select>
+
+        <button type="submit">Filtrar</button>
+    </form>
+
     <div class="grid">
         @forelse ($products as $product)
             <div class="card">

@@ -5,6 +5,7 @@ namespace App\Repositories;
 use App\Models\Category;
 use App\Repositories\Contracts\CategoryRepositoryInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Collection;
 
 class EloquentCategoryRepository implements CategoryRepositoryInterface
 {
@@ -14,6 +15,11 @@ class EloquentCategoryRepository implements CategoryRepositoryInterface
             ->withCount('products')
             ->latest()
             ->paginate($perPage);
+    }
+
+    public function all(): Collection
+    {
+        return Category::query()->orderBy('name')->get();
     }
 
     public function create(array $data): Category

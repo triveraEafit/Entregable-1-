@@ -37,6 +37,20 @@ class EloquentProductRepository implements ProductRepositoryInterface
             ->paginate($perPage);
     }
 
+    /**
+     * Funcionalidad interesante: filtro de productos por categoría y/o marca.
+     */
+    public function filterByCategoryAndBrand(?int $categoryId, ?int $brandId, int $perPage = 12): LengthAwarePaginator
+    {
+        return Product::query()
+            ->with(['brand', 'category'])
+            ->where('active', true)
+            ->when($categoryId, fn ($query) => $query->where('category_id', $categoryId))
+            ->when($brandId, fn ($query) => $query->where('brand_id', $brandId))
+            ->latest()
+            ->paginate($perPage);
+    }
+
     public function findWithRelations(int $id): Product
     {
         return Product::query()

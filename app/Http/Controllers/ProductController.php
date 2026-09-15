@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Repositories\Contracts\BrandRepositoryInterface;
+use App\Repositories\Contracts\CategoryRepositoryInterface;
 use App\Repositories\Contracts\ProductRepositoryInterface;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -9,7 +11,9 @@ use Illuminate\View\View;
 class ProductController extends Controller
 {
     public function __construct(
-        private readonly ProductRepositoryInterface $products
+        private readonly ProductRepositoryInterface $products,
+        private readonly BrandRepositoryInterface $brands,
+        private readonly CategoryRepositoryInterface $categories
     ) {}
 
     public function index(): View
@@ -38,6 +42,25 @@ class ProductController extends Controller
         return view('products.index', $data);
     }
 
+    /**
+     * Funcionalidad interesante 2: filtro de productos por categoría y/o marca.
+     */
+    public function filter(Request $request): View
+    {
+        $categoryId = $request->query('category_id') ? (int) $request->query('category_id') : null;
+        $brandId = $request->query('brand_id') ? (int) $request->query('brand_id') : null;
+
+        $data = [
+            'products' => $this->products->filterByCategoryAndBrand($categoryId, $brandId),
+            'categories' => $this->categories->all(),
+            'brands' => $this->brands->all(),
+            'selectedCategoryId' => $categoryId,
+            'selectedBrandId' => $brandId,
+        ];
+
+        return view('products.index', $data);
+    }
+
     public function show(int $id): View
     {
         $data = [
@@ -48,7 +71,7 @@ class ProductController extends Controller
     }
 
     /**
-     * Funcionalidad interesante 2: top 4 productos más comentados.
+     * Funcionalidad interesante 3: top 4 productos más comentados.
      */
     public function topCommented(): View
     {
