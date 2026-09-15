@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\BrandController as AdminBrandController;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\OrderController;
@@ -16,12 +17,12 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [ProductController::class, 'index'])->name('home');
 Route::get('/productos', [ProductController::class, 'index'])->name('products.index');
 Route::get('/productos/buscar', [ProductController::class, 'search'])->name('products.search');
+Route::get('/productos/filtro', [ProductController::class, 'filter'])->name('products.filter');
 Route::get('/productos/mas-comentados', [ProductController::class, 'topCommented'])->name('products.top-commented');
 Route::get('/productos/{id}', [ProductController::class, 'show'])->name('products.show');
 
 Route::middleware('auth')->group(function () {
-    Route::post('/productos/{product}/resenas', [ReviewController::class, 'store'])->name('reviews.store');
-
+    Route::post('/productos/{productId}/resenas', [ReviewController::class, 'store'])->name('reviews.store');
     Route::get('/mis-pedidos', [OrderController::class, 'index'])->name('orders.index');
     Route::post('/checkout', [OrderController::class, 'checkout'])->name('orders.checkout');
     Route::get('/mis-pedidos/{id}', [OrderController::class, 'show'])->name('orders.show');
@@ -37,6 +38,7 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::resource('products', AdminProductController::class)->except(['show']);
     Route::resource('categories', AdminCategoryController::class)->except(['show']);
+    Route::resource('brands', AdminBrandController::class)->except(['show']);
 });
 
 require __DIR__.'/auth.php';
