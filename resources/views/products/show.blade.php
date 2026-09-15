@@ -28,13 +28,17 @@
         </form>
     @endauth
 
-    <h2>Reseñas</h2>
-    @forelse ($product->reviews as $review)
+    <h2>Reseñas ({{ $product->reviews->count() }})</h2>
+    @forelse ($product->reviews->sortByDesc(fn ($review) => $review->getCreatedAtReview()) as $review)
         <div class="review">
-            <strong>{{ $review->user->name }}</strong> — {{ $review->rating }}/5
-            <p>{{ $review->comment }}</p>
+            <strong>{{ $review->user->name }}</strong>
+            <span>{{ str_repeat('★', $review->getRating()) }}{{ str_repeat('☆', 5 - $review->getRating()) }}</span>
+            <time>{{ \Illuminate\Support\Carbon::parse($review->getCreatedAtReview())->format('d/m/Y') }}</time>
+            @if ($review->getComment())
+                <p>{{ $review->getComment() }}</p>
+            @endif
         </div>
     @empty
-        <p>Aún no hay reseñas.</p>
+        <p>Aún no hay reseñas todavía. ¡Sé el primero en dejar una!</p>
     @endforelse
 @endsection
