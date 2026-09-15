@@ -2,14 +2,8 @@
 
 namespace App\Http\Requests;
 
-class UpdateProductRequest extends StoreProductRequest
-{
-    public function rules(): array
-    {
-        $rules = parent::rules();
-        // En edición la imagen es opcional aunque ya exista una.
-        $rules['image'] = ['nullable', 'image', 'max:2048'];
-
-        return $rules;
-    }
-}
+/**
+ * Editing a product uses the same authorization and rules as creating it. The image stays
+ * optional, so the current one is kept when the admin does not upload a new file.
+ */
+class UpdateProductRequest extends StoreProductRequest {}

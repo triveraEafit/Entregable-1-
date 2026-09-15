@@ -10,13 +10,12 @@ use App\Models\Category;
 use App\Models\Product;
 use App\Repositories\Contracts\ProductRepositoryInterface;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class ProductController extends Controller
 {
     /**
-     * DIP: el controlador depende de la interfaz, no de Eloquent directamente.
+     * DIP: the controller depends on the repository interface, not on Eloquent.
      */
     public function __construct(
         private readonly ProductRepositoryInterface $products
@@ -24,76 +23,60 @@ class ProductController extends Controller
 
     public function index(): View
     {
-        $data = [
+        $viewData = [
             'products' => $this->products->paginateForAdmin(),
         ];
 
-        return view('admin.products.index', $data);
+        return view('admin.products.index', $viewData);
     }
 
     public function create(): View
     {
-        $data = [
+        $viewData = [
             'brands' => Brand::orderBy('name')->get(),
             'categories' => Category::orderBy('name')->get(),
         ];
 
-        return view('admin.products.create', $data);
+        return view('admin.products.create', $viewData);
     }
 
     public function store(StoreProductRequest $request): RedirectResponse
     {
-        $validated = $request->validated();
-
-        if ($request->hasFile('image')) {
-            $validated['image'] = $request->file('image')->store('products', 'public');
-        }
-
-        $this->products->create($validated);
+        $this->products->create($request->safe()->except('image'), $request->file('image'));
 
         return redirect()
             ->route('admin.products.index')
-            ->with('status', 'Producto creado correctamente.');
+            ->with('status', __('products.created'));
     }
 
-    public function edit(Product $product): View
+    public function edit(string $id): View
     {
-        $data = [
-            'product' => $product,
+        $viewData = [
+            'product' => Product::findOrFail($id),
             'brands' => Brand::orderBy('name')->get(),
             'categories' => Category::orderBy('name')->get(),
         ];
 
-        return view('admin.products.edit', $data);
+        return view('admin.products.edit', $viewData);
     }
 
-    public function update(UpdateProductRequest $request, Product $product): RedirectResponse
+    public function update(UpdateProductRequest $request, string $id): RedirectResponse
     {
-        $validated = $request->validated();
-
-        if ($request->hasFile('image')) {
-            if ($product->image) {
-                Storage::disk('public')->delete($product->image);
-            }
-            $validated['image'] = $request->file('image')->store('products', 'public');
-        }
-
-        $this->products->update($product, $validated);
+        $product = Product::findOrFail($id);
+        $this->products->update($product, $request->safe()->except('image'), $request->file('image'));
 
         return redirect()
             ->route('admin.products.index')
-            ->with('status', 'Producto actualizado correctamente.');
+            ->with('status', __('products.updated'));
     }
 
-    /**
-     * Se desactiva en lugar de borrar físicamente (soft delete de negocio).
-     */
-    public function destroy(Product $product): RedirectResponse
+    public function deactivate(string $id): RedirectResponse
     {
-        $this->products->update($product, ['active' => false]);
+        $product = Product::findOrFail($id);
+        $this->products->deactivate($product);
 
         return redirect()
             ->route('admin.products.index')
-            ->with('status', 'Producto desactivado.');
+            ->with('status', __('products.deactivated'));
     }
 }

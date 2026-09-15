@@ -1,23 +1,28 @@
 <?php
 
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
-use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\OrderController;
-use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ReviewController;
 use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
-| Sección usuario final ("/*")
+| End user section ("/*")
 |--------------------------------------------------------------------------
-| Solo lectura y compra. No puede crear, editar ni borrar productos.
+| Read-only catalog and purchases. Customers cannot create, edit or delete products.
 */
-Route::get('/', [ProductController::class, 'index'])->name('home');
-Route::get('/productos', [ProductController::class, 'index'])->name('products.index');
-Route::get('/productos/buscar', [ProductController::class, 'search'])->name('products.search');
-Route::get('/productos/mas-comentados', [ProductController::class, 'topCommented'])->name('products.top-commented');
-Route::get('/productos/{id}', [ProductController::class, 'show'])->name('products.show');
+Route::get('/', 'App\Http\Controllers\ProductController@index')
+    ->name('home');
+Route::get('/productos', 'App\Http\Controllers\ProductController@index')
+    ->name('products.index');
+Route::get('/productos/buscar', 'App\Http\Controllers\ProductController@search')
+    ->name('products.search');
+Route::get('/productos/mas-comentados', 'App\Http\Controllers\ProductController@topCommented')
+    ->name('products.top-commented');
+Route::get('/productos/mas-vendidos', 'App\Http\Controllers\ProductController@topSelling')
+    ->name('products.top-selling');
+Route::get('/productos/{id}', 'App\Http\Controllers\ProductController@show')
+    ->name('products.show');
 
 Route::middleware('auth')->group(function () {
     Route::post('/productos/{product}/resenas', [ReviewController::class, 'store'])->name('reviews.store');
@@ -29,13 +34,26 @@ Route::middleware('auth')->group(function () {
 
 /*
 |--------------------------------------------------------------------------
-| Sección administrador ("/admin/*")
+| Admin section ("/admin/*")
 |--------------------------------------------------------------------------
-| Vistas y controladores independientes de la sección de usuario final.
-| Requiere autenticación + rol admin (middleware 'auth' y 'admin').
+| Views and controllers independent from the end user section.
+| Requires authentication and the admin role ('auth' and 'admin' middleware).
 */
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
-    Route::resource('products', AdminProductController::class)->except(['show']);
+    // The group adds the "admin." prefix: 'products.index' is registered as 'admin.products.index'.
+    Route::get('/productos', 'App\Http\Controllers\Admin\ProductController@index')
+        ->name('products.index');
+    Route::get('/productos/crear', 'App\Http\Controllers\Admin\ProductController@create')
+        ->name('products.create');
+    Route::post('/productos', 'App\Http\Controllers\Admin\ProductController@store')
+        ->name('products.store');
+    Route::get('/productos/{id}/editar', 'App\Http\Controllers\Admin\ProductController@edit')
+        ->name('products.edit');
+    Route::put('/productos/{id}', 'App\Http\Controllers\Admin\ProductController@update')
+        ->name('products.update');
+    Route::patch('/productos/{id}/desactivar', 'App\Http\Controllers\Admin\ProductController@deactivate')
+        ->name('products.deactivate');
+
     Route::resource('categories', AdminCategoryController::class)->except(['show']);
 });
 

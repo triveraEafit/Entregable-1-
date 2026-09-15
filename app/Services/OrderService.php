@@ -7,15 +7,22 @@ use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use RuntimeException;
 
 /**
- * Encapsula la lógica de negocio de creación de pedidos (SRP):
- * el controlador solo la invoca, no decide cómo se arma un pedido.
+ * Encapsulates the business logic that builds an order (SRP):
+ * the controller only calls it and does not decide how an order is created.
  */
 class OrderService
 {
     /**
-     * @param  array<int, array{product_id:int, quantity:int}>  $items
+     * Creates the order and its items and discounts the stock in a single transaction.
+     * Each product row is locked while it is checked, so two simultaneous purchases cannot
+     * sell the same units. If any product fails the checks, nothing is saved.
+     *
+     * @param  array<int, array{product_id: int, quantity: int}>  $items
+     *
+     * @throws RuntimeException when a product is inactive or does not have enough stock
      */
     public function checkout(User $user, array $items): Order
     {
@@ -28,24 +35,31 @@ class OrderService
             ]);
 
             foreach ($items as $item) {
-                /** @var Product $product */
+                $quantity = (int) $item['quantity'];
                 $product = Product::query()->lockForUpdate()->findOrFail($item['product_id']);
 
-                if (! $product->checkAvailability($item['quantity'])) {
-                    throw new \RuntimeException("Sin stock suficiente para {$product->name}.");
+                if (! $product->getActive()) {
+                    throw new RuntimeException(__('products.unavailable', ['name' => $product->getName()]));
+                }
+
+                if (! $product->checkAvailability($quantity)) {
+                    throw new RuntimeException(__('products.insufficient_stock', [
+                        'name' => $product->getName(),
+                        'stock' => $product->getStock(),
+                    ]));
                 }
 
                 $orderItem = new OrderItem([
-                    'quantity' => $item['quantity'],
-                    'unit_price' => $product->price,
+                    'quantity' => $quantity,
+                    'unit_price' => $product->getPrice(),
                     'subtotal' => 0,
-                    'product_id' => $product->id,
+                    'product_id' => $product->getId(),
                 ]);
 
                 $order->orderItems()->save($orderItem);
                 $orderItem->calculateSubtotal();
 
-                $product->decrement('stock', $item['quantity']);
+                $product->decreaseStock($quantity);
             }
 
             $order->calculateTotal();

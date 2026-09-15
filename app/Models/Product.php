@@ -2,12 +2,26 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * PRODUCT ATTRIBUTES
+ * $this->attributes['id'] - int - primary key
+ * $this->attributes['name'] - string - name of the product
+ * $this->attributes['description'] - string|null - description of the product
+ * $this->attributes['price'] - float - unit price of the product
+ * $this->attributes['stock'] - int - units available in the inventory
+ * $this->attributes['image'] - string|null - path of the product image inside the public disk
+ * $this->attributes['active'] - bool - whether the product is shown and can be bought in the store
+ * $this->attributes['brand_id'] - int - foreign key to brands table
+ * $this->attributes['category_id'] - int - foreign key to categories table
+ * $this->attributes['created_at'] - string - creation timestamp
+ * $this->attributes['updated_at'] - string - update timestamp
+ */
 class Product extends Model
 {
     use HasFactory;
@@ -23,21 +37,132 @@ class Product extends Model
         'category_id',
     ];
 
-    protected function casts(): array
+    // Setters
+    public function setId(int $id): void
     {
-        return [
-            'price' => 'decimal:2',
-            'active' => 'boolean',
-        ];
+        $this->attributes['id'] = $id;
     }
 
-    // ------------------------------------------------------------------
-    // Relaciones (cada línea del diagrama de clases = 2 métodos)
-    // ------------------------------------------------------------------
+    public function setName(string $name): void
+    {
+        $this->attributes['name'] = $name;
+    }
 
+    public function setDescription(?string $description): void
+    {
+        $this->attributes['description'] = $description;
+    }
+
+    public function setPrice(float $price): void
+    {
+        $this->attributes['price'] = $price;
+    }
+
+    public function setStock(int $stock): void
+    {
+        $this->attributes['stock'] = $stock;
+    }
+
+    public function setImage(?string $image): void
+    {
+        $this->attributes['image'] = $image;
+    }
+
+    public function setActive(bool $active): void
+    {
+        $this->attributes['active'] = $active;
+    }
+
+    public function setBrandId(int $brandId): void
+    {
+        $this->attributes['brand_id'] = $brandId;
+    }
+
+    public function setCategoryId(int $categoryId): void
+    {
+        $this->attributes['category_id'] = $categoryId;
+    }
+
+    // Getters
+    public function getId(): int
+    {
+        return (int) $this->attributes['id'];
+    }
+
+    public function getName(): string
+    {
+        return $this->attributes['name'];
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->attributes['description'] ?? null;
+    }
+
+    public function getPrice(): float
+    {
+        return (float) $this->attributes['price'];
+    }
+
+    public function getFormattedPrice(): string
+    {
+        return '$'.number_format($this->getPrice(), 2);
+    }
+
+    public function getStock(): int
+    {
+        return (int) ($this->attributes['stock'] ?? 0);
+    }
+
+    public function getImage(): ?string
+    {
+        return $this->attributes['image'] ?? null;
+    }
+
+    public function getActive(): bool
+    {
+        return (bool) ($this->attributes['active'] ?? true);
+    }
+
+    public function getBrandId(): int
+    {
+        return (int) $this->attributes['brand_id'];
+    }
+
+    public function getCategoryId(): int
+    {
+        return (int) $this->attributes['category_id'];
+    }
+
+    public function getCreatedAt(): string
+    {
+        return $this->attributes['created_at'];
+    }
+
+    public function getUpdatedAt(): string
+    {
+        return $this->attributes['updated_at'];
+    }
+
+    public function getReviewsCount(): int
+    {
+        return (int) ($this->attributes['reviews_count'] ?? 0);
+    }
+
+    public function getUnitsSold(): int
+    {
+        return (int) ($this->attributes['units_sold'] ?? 0);
+    }
+
+    // Non-primitive methods/relations
     public function brand(): BelongsTo
     {
         return $this->belongsTo(Brand::class);
+    }
+
+    public function getBrand(): Brand
+    {
+        return $this->brand;
     }
 
     public function category(): BelongsTo
@@ -45,9 +170,22 @@ class Product extends Model
         return $this->belongsTo(Category::class);
     }
 
+    public function getCategory(): Category
+    {
+        return $this->category;
+    }
+
     public function orderItems(): HasMany
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    /**
+     * @return Collection<int, OrderItem>
+     */
+    public function getOrderItems(): Collection
+    {
+        return $this->orderItems;
     }
 
     public function reviews(): HasMany
@@ -55,27 +193,28 @@ class Product extends Model
         return $this->hasMany(Review::class);
     }
 
-    // ------------------------------------------------------------------
-    // Accessor de solo lectura: precio formateado
-    // ------------------------------------------------------------------
-
-    protected function formattedPrice(): Attribute
+    /**
+     * @return Collection<int, Review>
+     */
+    public function getReviews(): Collection
     {
-        return Attribute::make(
-            get: fn () => '$' . number_format((float) $this->price, 2),
-        );
+        return $this->reviews;
     }
 
-    // ------------------------------------------------------------------
-    // Lógica de negocio del dominio
-    // ------------------------------------------------------------------
-
     /**
-     * Verifica si hay unidades disponibles para la cantidad solicitada.
+     * Checks that the product is active and has enough units for the requested quantity.
      */
     public function checkAvailability(int $quantity = 1): bool
     {
-        return $this->active && $this->stock >= $quantity;
+        return $this->getActive() && $this->getStock() >= $quantity;
+    }
+
+    /**
+     * Subtracts the sold units with a single "stock = stock - quantity" update.
+     */
+    public function decreaseStock(int $quantity): void
+    {
+        $this->decrement('stock', $quantity);
     }
 
     public function averageRating(): float
