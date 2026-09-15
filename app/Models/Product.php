@@ -104,11 +104,6 @@ class Product extends Model
         return (float) $this->attributes['price'];
     }
 
-    public function getFormattedPrice(): string
-    {
-        return '$'.number_format($this->getPrice(), 2);
-    }
-
     public function getStock(): int
     {
         return (int) ($this->attributes['stock'] ?? 0);
@@ -142,16 +137,6 @@ class Product extends Model
     public function getUpdatedAt(): string
     {
         return $this->attributes['updated_at'];
-    }
-
-    public function getReviewsCount(): int
-    {
-        return (int) ($this->attributes['reviews_count'] ?? 0);
-    }
-
-    public function getUnitsSold(): int
-    {
-        return (int) ($this->attributes['units_sold'] ?? 0);
     }
 
     // Non-primitive methods/relations
@@ -199,6 +184,30 @@ class Product extends Model
     public function getReviews(): Collection
     {
         return $this->reviews;
+    }
+
+    /**
+     * Price formatted for the store, calculated from the price attribute.
+     */
+    public function getFormattedPrice(): string
+    {
+        return '$'.number_format($this->getPrice(), 2);
+    }
+
+    /**
+     * Number of reviews calculated by withCount('reviews'). It is 0 when the query did not count them.
+     */
+    public function getReviewsCount(): int
+    {
+        return (int) ($this->attributes['reviews_count'] ?? 0);
+    }
+
+    /**
+     * Units sold calculated by withSum() over the order items. It is 0 when the query did not add them.
+     */
+    public function getUnitsSold(): int
+    {
+        return (int) ($this->attributes['units_sold'] ?? 0);
     }
 
     /**

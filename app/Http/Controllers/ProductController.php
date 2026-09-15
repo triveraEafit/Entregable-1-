@@ -18,7 +18,7 @@ class ProductController extends Controller
             'products' => $this->products->paginateActive(),
         ];
 
-        return view('products.index', $viewData);
+        return view('products.index')->with('viewData', $viewData);
     }
 
     /**
@@ -33,7 +33,7 @@ class ProductController extends Controller
             'term' => $term,
         ];
 
-        return view('products.index', $viewData);
+        return view('products.index')->with('viewData', $viewData);
     }
 
     public function show(string $id): View
@@ -42,7 +42,7 @@ class ProductController extends Controller
             'product' => $this->products->findActiveWithRelations($id),
         ];
 
-        return view('products.show', $viewData);
+        return view('products.show')->with('viewData', $viewData);
     }
 
     /**
@@ -54,7 +54,7 @@ class ProductController extends Controller
             'products' => $this->products->topCommented(4),
         ];
 
-        return view('products.top-commented', $viewData);
+        return view('products.top-commented')->with('viewData', $viewData);
     }
 
     /**
@@ -66,6 +66,6 @@ class ProductController extends Controller
             'products' => $this->products->topSelling(5),
         ];
 
-        return view('products.top-selling', $viewData);
+        return view('products.top-selling')->with('viewData', $viewData);
     }
 }

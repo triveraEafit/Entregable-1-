@@ -6,13 +6,13 @@
     <h1>{{ __('products.catalog_heading') }}</h1>
 
     <form action="{{ route('products.search') }}" method="GET">
-        <input type="text" name="q" placeholder="{{ __('products.search_placeholder') }}" value="{{ $term ?? '' }}">
+        <input type="text" name="q" placeholder="{{ __('products.search_placeholder') }}" value="{{ $viewData['term'] ?? '' }}">
         <button type="submit">{{ __('products.search') }}</button>
         @error('q') <span class="error">{{ $message }}</span> @enderror
     </form>
 
     <div class="grid">
-        @forelse ($products as $product)
+        @forelse ($viewData['products'] as $product)
             <div class="card">
                 @if ($product->getImage())
                     <img src="{{ asset('storage/'.$product->getImage()) }}" alt="{{ $product->getName() }}" width="200">
@@ -29,5 +29,5 @@
         @endforelse
     </div>
 
-    {{ $products->links() }}
+    {{ $viewData['products']->links() }}
 @endsection

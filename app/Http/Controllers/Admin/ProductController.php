@@ -27,7 +27,7 @@ class ProductController extends Controller
             'products' => $this->products->paginateForAdmin(),
         ];
 
-        return view('admin.products.index', $viewData);
+        return view('admin.products.index')->with('viewData', $viewData);
     }
 
     public function create(): View
@@ -37,7 +37,7 @@ class ProductController extends Controller
             'categories' => Category::orderBy('name')->get(),
         ];
 
-        return view('admin.products.create', $viewData);
+        return view('admin.products.create')->with('viewData', $viewData);
     }
 
     public function store(StoreProductRequest $request): RedirectResponse
@@ -57,7 +57,7 @@ class ProductController extends Controller
             'categories' => Category::orderBy('name')->get(),
         ];
 
-        return view('admin.products.edit', $viewData);
+        return view('admin.products.edit')->with('viewData', $viewData);
     }
 
     public function update(UpdateProductRequest $request, string $id): RedirectResponse

@@ -6,7 +6,7 @@
     <h1>{{ __('products.top_commented_heading') }}</h1>
 
     <ol>
-        @foreach ($products as $product)
+        @foreach ($viewData['products'] as $product)
             <li>
                 <a href="{{ route('products.show', ['id' => $product->getId()]) }}">{{ $product->getName() }}</a>
                 — {{ trans_choice('products.comments_count', $product->getReviewsCount()) }}

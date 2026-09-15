@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 | Read-only catalog and purchases. Customers cannot create, edit or delete products.
 */
-Route::get('/', 'App\Http\Controllers\ProductController@index')
+Route::get('/', 'App\Http\Controllers\HomeController@index')
     ->name('home');
 Route::get('/productos', 'App\Http\Controllers\ProductController@index')
     ->name('products.index');

@@ -20,7 +20,7 @@
             </tr>
         </thead>
         <tbody>
-            @forelse ($products as $product)
+            @forelse ($viewData['products'] as $product)
                 <tr>
                     <td>
                         @if ($product->getImage())
@@ -54,5 +54,5 @@
         </tbody>
     </table>
 
-    {{ $products->links() }}
+    {{ $viewData['products']->links() }}
 @endsection

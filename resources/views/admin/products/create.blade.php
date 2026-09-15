@@ -7,7 +7,11 @@
 
     <form action="{{ route('admin.products.store') }}" method="POST" enctype="multipart/form-data">
         @csrf
-        @include('admin.products._form', ['product' => null])
+        @include('admin.products._form', [
+            'product' => null,
+            'brands' => $viewData['brands'],
+            'categories' => $viewData['categories'],
+        ])
         <button type="submit">{{ __('products.save') }}</button>
     </form>
 @endsection

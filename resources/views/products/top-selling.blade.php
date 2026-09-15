@@ -5,11 +5,11 @@
 @section('content')
     <h1>{{ __('products.top_selling_heading') }}</h1>
 
-    @if ($products->isEmpty())
+    @if ($viewData['products']->isEmpty())
         <p>{{ __('products.no_sales') }}</p>
     @else
         <ol>
-            @foreach ($products as $product)
+            @foreach ($viewData['products'] as $product)
                 <li>
                     <a href="{{ route('products.show', ['id' => $product->getId()]) }}">{{ $product->getName() }}</a>
                     — {{ $product->getBrand()->getName() }} · {{ $product->getFormattedPrice() }}
