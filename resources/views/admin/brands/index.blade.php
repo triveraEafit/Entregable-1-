@@ -16,7 +16,7 @@
             </tr>
         </thead>
         <tbody>
-            @foreach ($brands as $brand)
+            @foreach ($viewData['brands'] as $brand)
                 <tr>
                     <td>{{ $brand->getName() }}</td>
                     <td>{{ $brand->getCountry() }}</td>
@@ -34,5 +34,5 @@
         </tbody>
     </table>
 
-    {{ $brands->links() }}
+    {{ $viewData['brands']->links() }}
 @endsection

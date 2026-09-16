@@ -15,7 +15,7 @@
             </tr>
         </thead>
         <tbody>
-            @foreach ($categories as $category)
+            @foreach ($viewData['categories'] as $category)
                 <tr>
                     <td>{{ $category->getName() }}</td>
                     <td>{{ $category->getProductsCount() }}</td>
@@ -32,5 +32,5 @@
         </tbody>
     </table>
 
-    {{ $categories->links() }}
+    {{ $viewData['categories']->links() }}
 @endsection

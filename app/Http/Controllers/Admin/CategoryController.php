@@ -22,7 +22,7 @@ class CategoryController extends Controller
             'categories' => $this->categories->paginate(),
         ];
 
-        return view('admin.categories.index', $viewData);
+        return view('admin.categories.index')->with('viewData', $viewData);
     }
 
     public function create(): View
@@ -45,7 +45,7 @@ class CategoryController extends Controller
             'category' => Category::findOrFail($id),
         ];
 
-        return view('admin.categories.edit', $viewData);
+        return view('admin.categories.edit')->with('viewData', $viewData);
     }
 
     public function update(UpdateCategoryRequest $request, string $id): RedirectResponse

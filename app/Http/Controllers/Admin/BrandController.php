@@ -22,7 +22,7 @@ class BrandController extends Controller
             'brands' => $this->brands->paginate(),
         ];
 
-        return view('admin.brands.index', $viewData);
+        return view('admin.brands.index')->with('viewData', $viewData);
     }
 
     public function create(): View
@@ -45,7 +45,7 @@ class BrandController extends Controller
             'brand' => Brand::findOrFail($id),
         ];
 
-        return view('admin.brands.edit', $viewData);
+        return view('admin.brands.edit')->with('viewData', $viewData);
     }
 
     public function update(UpdateBrandRequest $request, string $id): RedirectResponse
