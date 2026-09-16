@@ -1,42 +1,55 @@
 <?php
 
-use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
-use App\Http\Controllers\Admin\ProductController as AdminProductController;
-use App\Http\Controllers\OrderController;
-use App\Http\Controllers\ProductController;
-use App\Http\Controllers\ReviewController;
 use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
-| Sección usuario final ("/*")
+| Public section ("/*")
 |--------------------------------------------------------------------------
-| Solo lectura y compra. No puede crear, editar ni borrar productos.
+| Read-only and purchase. Cannot create, edit, or delete products.
 */
-Route::get('/', [ProductController::class, 'index'])->name('home');
-Route::get('/productos', [ProductController::class, 'index'])->name('products.index');
-Route::get('/productos/buscar', [ProductController::class, 'search'])->name('products.search');
-Route::get('/productos/mas-comentados', [ProductController::class, 'topCommented'])->name('products.top-commented');
-Route::get('/productos/{id}', [ProductController::class, 'show'])->name('products.show');
+Route::get('/', 'App\Http\Controllers\HomeController@index')->name('home');
+Route::get('/productos', 'App\Http\Controllers\ProductController@index')->name('products.index');
+Route::get('/productos/buscar', 'App\Http\Controllers\ProductController@search')->name('products.search');
+Route::get('/productos/filtro', 'App\Http\Controllers\ProductController@filter')->name('products.filter');
+Route::get('/productos/mas-comentados', 'App\Http\Controllers\ProductController@topCommented')->name('products.top-commented');
+Route::get('/productos/{id}', 'App\Http\Controllers\ProductController@show')->name('products.show');
 
 Route::middleware('auth')->group(function () {
-    Route::post('/productos/{product}/resenas', [ReviewController::class, 'store'])->name('reviews.store');
-
-    Route::get('/mis-pedidos', [OrderController::class, 'index'])->name('orders.index');
-    Route::post('/checkout', [OrderController::class, 'checkout'])->name('orders.checkout');
-    Route::get('/mis-pedidos/{id}', [OrderController::class, 'show'])->name('orders.show');
+    Route::post('/productos/{productId}/resenas', 'App\Http\Controllers\ReviewController@store')->name('reviews.store');
+    Route::get('/mis-pedidos', 'App\Http\Controllers\OrderController@index')->name('orders.index');
+    Route::post('/checkout', 'App\Http\Controllers\OrderController@checkout')->name('orders.checkout');
+    Route::get('/mis-pedidos/{id}', 'App\Http\Controllers\OrderController@show')->name('orders.show');
 });
 
 /*
 |--------------------------------------------------------------------------
-| Sección administrador ("/admin/*")
+| Admin section ("/admin/*")
 |--------------------------------------------------------------------------
-| Vistas y controladores independientes de la sección de usuario final.
-| Requiere autenticación + rol admin (middleware 'auth' y 'admin').
+| Independent views and controllers from the public section.
+| Requires authentication and admin role ('auth' and 'admin' middleware).
 */
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
-    Route::resource('products', AdminProductController::class)->except(['show']);
-    Route::resource('categories', AdminCategoryController::class)->except(['show']);
+    Route::get('/products', 'App\Http\Controllers\Admin\ProductController@index')->name('products.index');
+    Route::get('/products/create', 'App\Http\Controllers\Admin\ProductController@create')->name('products.create');
+    Route::post('/products', 'App\Http\Controllers\Admin\ProductController@store')->name('products.store');
+    Route::get('/products/{id}/edit', 'App\Http\Controllers\Admin\ProductController@edit')->name('products.edit');
+    Route::put('/products/{id}', 'App\Http\Controllers\Admin\ProductController@update')->name('products.update');
+    Route::delete('/products/{id}', 'App\Http\Controllers\Admin\ProductController@destroy')->name('products.destroy');
+
+    Route::get('/categories', 'App\Http\Controllers\Admin\CategoryController@index')->name('categories.index');
+    Route::get('/categories/create', 'App\Http\Controllers\Admin\CategoryController@create')->name('categories.create');
+    Route::post('/categories', 'App\Http\Controllers\Admin\CategoryController@store')->name('categories.store');
+    Route::get('/categories/{id}/edit', 'App\Http\Controllers\Admin\CategoryController@edit')->name('categories.edit');
+    Route::put('/categories/{id}', 'App\Http\Controllers\Admin\CategoryController@update')->name('categories.update');
+    Route::delete('/categories/{id}', 'App\Http\Controllers\Admin\CategoryController@destroy')->name('categories.destroy');
+
+    Route::get('/brands', 'App\Http\Controllers\Admin\BrandController@index')->name('brands.index');
+    Route::get('/brands/create', 'App\Http\Controllers\Admin\BrandController@create')->name('brands.create');
+    Route::post('/brands', 'App\Http\Controllers\Admin\BrandController@store')->name('brands.store');
+    Route::get('/brands/{id}/edit', 'App\Http\Controllers\Admin\BrandController@edit')->name('brands.edit');
+    Route::put('/brands/{id}', 'App\Http\Controllers\Admin\BrandController@update')->name('brands.update');
+    Route::delete('/brands/{id}', 'App\Http\Controllers\Admin\BrandController@destroy')->name('brands.destroy');
 });
 
 require __DIR__.'/auth.php';

@@ -10,6 +10,7 @@
         <nav>
             <a href="{{ route('admin.products.index') }}">Productos</a>
             <a href="{{ route('admin.categories.index') }}">Categorías</a>
+            <a href="{{ route('admin.brands.index') }}">Marcas</a>
             <a href="{{ route('home') }}">Ver tienda pública</a>
         </nav>
     </aside>

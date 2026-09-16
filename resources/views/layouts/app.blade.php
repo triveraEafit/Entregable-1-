@@ -10,6 +10,7 @@
         <nav>
             <a href="{{ route('home') }}">Inicio</a>
             <a href="{{ route('products.index') }}">Productos</a>
+            <a href="{{ route('products.top-commented') }}">Más comentados</a>
             @auth
                 <a href="{{ route('orders.index') }}">Mis pedidos</a>
                 @if (auth()->user()->isAdmin())

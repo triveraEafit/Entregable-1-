@@ -1,8 +1,8 @@
 @php($c = $category)
 
-<label>Nombre</label>
-<input type="text" name="name" value="{{ old('name', $c->name ?? '') }}">
+<label>{{ __('categories.name') }}</label>
+<input type="text" name="name" value="{{ old('name', $c?->getName() ?? '') }}">
 @error('name') <span class="error">{{ $message }}</span> @enderror
 
-<label>Descripción</label>
-<textarea name="description">{{ old('description', $c->description ?? '') }}</textarea>
+<label>{{ __('categories.description') }}</label>
+<textarea name="description">{{ old('description', $c?->getDescription() ?? '') }}</textarea>

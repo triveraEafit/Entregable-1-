@@ -23,4 +23,6 @@ interface ProductRepositoryInterface
     public function delete(Product $product): bool;
 
     public function topCommented(int $limit = 4): Collection;
+
+    public function filterByCategoryAndBrand(?int $categoryId, ?int $brandId, int $perPage = 12): LengthAwarePaginator;
 }

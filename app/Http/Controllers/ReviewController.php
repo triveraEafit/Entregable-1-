@@ -2,25 +2,23 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreReviewRequest;
 use App\Models\Product;
 use App\Models\Review;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 
 class ReviewController extends Controller
 {
-    public function store(Request $request, Product $product): RedirectResponse
+    public function store(StoreReviewRequest $request, string $productId): RedirectResponse
     {
-        $validated = $request->validate([
-            'rating' => ['required', 'integer', 'min:1', 'max:5'],
-            'comment' => ['nullable', 'string', 'max:1000'],
-        ]);
+        $product = Product::findOrFail($productId);
 
         Review::create([
-            ...$validated,
+            'rating' => $request->validated('rating'),
+            'comment' => $request->validated('comment'),
             'created_at_review' => now(),
-            'user_id' => $request->user()->id,
-            'product_id' => $product->id,
+            'user_id' => $request->user()->getId(),
+            'product_id' => $product->getId(),
         ]);
 
         return back()->with('status', 'Gracias por tu reseña.');
