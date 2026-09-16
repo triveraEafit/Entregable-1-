@@ -74,7 +74,7 @@ class ProductControllerTest extends TestCase
             'active' => '1',
             'brand_id' => $brand->getId(),
             'category_id' => $category->getId(),
-            'image' => UploadedFile::fake()->image('zenbook.jpg'),
+            'image' => UploadedFile::fake()->create('zenbook.jpg', 100, 'image/jpeg'),
         ]);
 
         $response->assertRedirect(route('admin.products.index'))
@@ -143,12 +143,12 @@ class ProductControllerTest extends TestCase
     public function test_update_changes_product_data_and_replaces_its_image(): void
     {
         Storage::fake('public');
-        $previousImage = UploadedFile::fake()->image('old.jpg')->store('products', 'public');
+        $previousImage = UploadedFile::fake()->create('old.jpg', 100, 'image/jpeg')->store('products', 'public');
         $product = Product::factory()->create(['image' => $previousImage]);
         $payload = $this->productPayload([
             'name' => 'Nombre editado',
             'stock' => '12',
-            'image' => UploadedFile::fake()->image('new.jpg'),
+            'image' => UploadedFile::fake()->create('new.jpg', 100, 'image/jpeg'),
         ]);
 
         $response = $this->actingAs($this->admin())->put(route('admin.products.update', ['id' => $product->getId()]), $payload);
@@ -167,7 +167,7 @@ class ProductControllerTest extends TestCase
     public function test_update_keeps_current_image_when_no_new_file_is_uploaded(): void
     {
         Storage::fake('public');
-        $image = UploadedFile::fake()->image('laptop.jpg')->store('products', 'public');
+        $image = UploadedFile::fake()->create('laptop.jpg', 100, 'image/jpeg')->store('products', 'public');
         $product = Product::factory()->create(['image' => $image]);
 
         $this->actingAs($this->admin())->put(route('admin.products.update', ['id' => $product->getId()]), $this->productPayload());

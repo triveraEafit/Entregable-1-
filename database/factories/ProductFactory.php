@@ -12,6 +12,8 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class ProductFactory extends Factory
 {
+    protected $model = Product::class;
+
     /**
      * Define the model's default state.
      *
@@ -21,7 +23,7 @@ class ProductFactory extends Factory
     {
         return [
             'name' => ucfirst(fake()->unique()->words(3, true)),
-            'description' => fake()->sentence(),
+            'description' => fake()->paragraph(),
             'price' => fake()->randomFloat(2, 10000, 5000000),
             'stock' => fake()->numberBetween(1, 50),
             'image' => null,

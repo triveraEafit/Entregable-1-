@@ -14,9 +14,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * $this->attributes['name'] - string - name of the product
  * $this->attributes['description'] - string|null - description of the product
  * $this->attributes['price'] - float - unit price of the product
- * $this->attributes['stock'] - int - units available in the inventory
- * $this->attributes['image'] - string|null - path of the product image inside the public disk
- * $this->attributes['active'] - bool - whether the product is shown and can be bought in the store
+ * $this->attributes['stock'] - int - units available in stock
+ * $this->attributes['image'] - string|null - path to the product image inside the public disk
+ * $this->attributes['active'] - bool - whether the product is visible/purchasable
  * $this->attributes['brand_id'] - int - foreign key to brands table
  * $this->attributes['category_id'] - int - foreign key to categories table
  * $this->attributes['created_at'] - string - creation timestamp
@@ -36,6 +36,14 @@ class Product extends Model
         'brand_id',
         'category_id',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'price' => 'decimal:2',
+            'active' => 'boolean',
+        ];
+    }
 
     // Setters
     public function setId(int $id): void

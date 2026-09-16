@@ -2,8 +2,10 @@
 
 namespace App\Providers;
 
+use App\Repositories\Contracts\BrandRepositoryInterface;
 use App\Repositories\Contracts\CategoryRepositoryInterface;
 use App\Repositories\Contracts\ProductRepositoryInterface;
+use App\Repositories\EloquentBrandRepository;
 use App\Repositories\EloquentCategoryRepository;
 use App\Repositories\EloquentProductRepository;
 use Illuminate\Support\ServiceProvider;
@@ -19,5 +21,6 @@ class RepositoryServiceProvider extends ServiceProvider
     {
         $this->app->bind(ProductRepositoryInterface::class, EloquentProductRepository::class);
         $this->app->bind(CategoryRepositoryInterface::class, EloquentCategoryRepository::class);
+        $this->app->bind(BrandRepositoryInterface::class, EloquentBrandRepository::class);
     }
 }

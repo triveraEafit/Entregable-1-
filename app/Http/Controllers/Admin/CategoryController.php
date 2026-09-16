@@ -18,11 +18,11 @@ class CategoryController extends Controller
 
     public function index(): View
     {
-        $data = [
+        $viewData = [
             'categories' => $this->categories->paginate(),
         ];
 
-        return view('admin.categories.index', $data);
+        return view('admin.categories.index')->with('viewData', $viewData);
     }
 
     public function create(): View
@@ -39,15 +39,18 @@ class CategoryController extends Controller
             ->with('status', 'Categoría creada correctamente.');
     }
 
-    public function edit(Category $category): View
+    public function edit(string $id): View
     {
-        $data = ['category' => $category];
+        $viewData = [
+            'category' => Category::findOrFail($id),
+        ];
 
-        return view('admin.categories.edit', $data);
+        return view('admin.categories.edit')->with('viewData', $viewData);
     }
 
-    public function update(UpdateCategoryRequest $request, Category $category): RedirectResponse
+    public function update(UpdateCategoryRequest $request, string $id): RedirectResponse
     {
+        $category = Category::findOrFail($id);
         $this->categories->update($category, $request->validated());
 
         return redirect()
@@ -55,8 +58,9 @@ class CategoryController extends Controller
             ->with('status', 'Categoría actualizada correctamente.');
     }
 
-    public function destroy(Category $category): RedirectResponse
+    public function destroy(string $id): RedirectResponse
     {
+        $category = Category::findOrFail($id);
         $this->categories->delete($category);
 
         return redirect()

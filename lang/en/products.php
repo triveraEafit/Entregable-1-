@@ -32,6 +32,8 @@ return [
     'catalog_heading' => 'Product catalog',
     'search_placeholder' => 'Search product...',
     'search' => 'Search',
+    'filter' => 'Filter',
+    'filter_all' => 'All',
     'not_found' => 'No products were found.',
     'available' => 'Available',
     'sold_out' => 'Sold out',

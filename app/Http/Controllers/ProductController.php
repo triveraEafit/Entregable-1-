@@ -3,13 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\SearchProductRequest;
+use App\Repositories\Contracts\BrandRepositoryInterface;
+use App\Repositories\Contracts\CategoryRepositoryInterface;
 use App\Repositories\Contracts\ProductRepositoryInterface;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class ProductController extends Controller
 {
     public function __construct(
-        private readonly ProductRepositoryInterface $products
+        private readonly ProductRepositoryInterface $products,
+        private readonly CategoryRepositoryInterface $categories,
+        private readonly BrandRepositoryInterface $brands,
     ) {}
 
     public function index(): View
@@ -31,6 +36,25 @@ class ProductController extends Controller
         $viewData = [
             'products' => $this->products->searchByName($term),
             'term' => $term,
+        ];
+
+        return view('products.index')->with('viewData', $viewData);
+    }
+
+    /**
+     * Interesting feature: filter products by category and/or brand.
+     */
+    public function filter(Request $request): View
+    {
+        $categoryId = $request->query('category_id') ? (int) $request->query('category_id') : null;
+        $brandId = $request->query('brand_id') ? (int) $request->query('brand_id') : null;
+
+        $viewData = [
+            'products' => $this->products->filterByCategoryAndBrand($categoryId, $brandId),
+            'categories' => $this->categories->all(),
+            'brands' => $this->brands->all(),
+            'selectedCategoryId' => $categoryId,
+            'selectedBrandId' => $brandId,
         ];
 
         return view('products.index')->with('viewData', $viewData);

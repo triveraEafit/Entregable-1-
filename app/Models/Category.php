@@ -65,14 +65,17 @@ class Category extends Model
         return $this->attributes['updated_at'];
     }
 
-    public function getProductsCount(): int
-    {
-        return (int) ($this->attributes['products_count'] ?? 0);
-    }
-
     // Non-primitive methods/relations
     public function products(): HasMany
     {
         return $this->hasMany(Product::class);
+    }
+
+    /**
+     * Only available when the query used withCount('products').
+     */
+    public function getProductsCount(): int
+    {
+        return (int) ($this->attributes['products_count'] ?? 0);
     }
 }

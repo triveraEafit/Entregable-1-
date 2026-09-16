@@ -32,6 +32,8 @@ return [
     'catalog_heading' => 'Catálogo de productos',
     'search_placeholder' => 'Buscar producto...',
     'search' => 'Buscar',
+    'filter' => 'Filtrar',
+    'filter_all' => 'Todas',
     'not_found' => 'No se encontraron productos.',
     'available' => 'Disponible',
     'sold_out' => 'Agotado',

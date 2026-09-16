@@ -40,6 +40,7 @@ class EloquentProductRepository implements ProductRepositoryInterface
     }
 
     /**
+     * Interesting feature: search products by name.
      * An empty term lists every active product. The term is kept in the pagination links.
      */
     public function searchByName(string $term, int $perPage = 12): LengthAwarePaginator
@@ -50,6 +51,22 @@ class EloquentProductRepository implements ProductRepositoryInterface
             ->when($term !== '', function (Builder $query) use ($term): void {
                 $query->where('name', 'like', "%{$term}%");
             })
+            ->latest()
+            ->paginate($perPage)
+            ->withQueryString();
+    }
+
+    /**
+     * Interesting feature: filter products by category and/or brand.
+     * The selected filters are kept in the pagination links.
+     */
+    public function filterByCategoryAndBrand(?int $categoryId, ?int $brandId, int $perPage = 12): LengthAwarePaginator
+    {
+        return Product::query()
+            ->with(['brand', 'category'])
+            ->where('active', true)
+            ->when($categoryId, fn (Builder $query) => $query->where('category_id', $categoryId))
+            ->when($brandId, fn (Builder $query) => $query->where('brand_id', $brandId))
             ->latest()
             ->paginate($perPage)
             ->withQueryString();
@@ -109,7 +126,7 @@ class EloquentProductRepository implements ProductRepositoryInterface
     }
 
     /**
-     * Ranks active products by the units sold in orders that were not cancelled.
+     * Interesting feature: ranks active products by the units sold in orders that were not cancelled.
      */
     public function topSelling(int $limit = 5): Collection
     {
@@ -130,6 +147,9 @@ class EloquentProductRepository implements ProductRepositoryInterface
             ->get();
     }
 
+    /**
+     * Interesting feature: top N active products with the most reviews.
+     */
     public function topCommented(int $limit = 4): Collection
     {
         return Product::query()

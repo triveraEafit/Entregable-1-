@@ -15,6 +15,8 @@ interface ProductRepositoryInterface
 
     public function searchByName(string $term, int $perPage = 12): LengthAwarePaginator;
 
+    public function filterByCategoryAndBrand(?int $categoryId, ?int $brandId, int $perPage = 12): LengthAwarePaginator;
+
     public function findActiveWithRelations(string $id): Product;
 
     /**
@@ -34,5 +36,8 @@ interface ProductRepositoryInterface
      */
     public function topSelling(int $limit = 5): Collection;
 
+    /**
+     * @return Collection<int, Product>
+     */
     public function topCommented(int $limit = 4): Collection;
 }

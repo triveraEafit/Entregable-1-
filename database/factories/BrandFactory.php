@@ -10,6 +10,8 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class BrandFactory extends Factory
 {
+    protected $model = Brand::class;
+
     /**
      * Define the model's default state.
      *
