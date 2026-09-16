@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\SearchProductRequest;
 use App\Repositories\Contracts\BrandRepositoryInterface;
 use App\Repositories\Contracts\CategoryRepositoryInterface;
 use App\Repositories\Contracts\ProductRepositoryInterface;
@@ -26,16 +27,14 @@ class ProductController extends Controller
     }
 
     /**
-     * Funcionalidad interesante: búsqueda de productos por nombre.
+     * Interesting feature: search products by name.
      */
-    public function search(Request $request): View
+    public function search(SearchProductRequest $request): View
     {
-        $term = (string) $request->query('q', '');
+        $term = (string) $request->validated('q');
 
         $viewData = [
-            'products' => $term !== ''
-                ? $this->products->searchByName($term)
-                : $this->products->paginateActive(),
+            'products' => $this->products->searchByName($term),
             'term' => $term,
         ];
 
@@ -43,7 +42,7 @@ class ProductController extends Controller
     }
 
     /**
-     * Funcionalidad interesante: filtro de productos por categoría y/o marca.
+     * Interesting feature: filter products by category and/or brand.
      */
     public function filter(Request $request): View
     {
@@ -64,14 +63,14 @@ class ProductController extends Controller
     public function show(string $id): View
     {
         $viewData = [
-            'product' => $this->products->findWithRelations((int) $id),
+            'product' => $this->products->findActiveWithRelations($id),
         ];
 
         return view('products.show')->with('viewData', $viewData);
     }
 
     /**
-     * Funcionalidad interesante: top 4 productos más comentados.
+     * Interesting feature: top 4 most commented products.
      */
     public function topCommented(): View
     {
@@ -80,5 +79,17 @@ class ProductController extends Controller
         ];
 
         return view('products.top-commented')->with('viewData', $viewData);
+    }
+
+    /**
+     * Interesting feature: top 5 best-selling products.
+     */
+    public function topSelling(): View
+    {
+        $viewData = [
+            'products' => $this->products->topSelling(5),
+        ];
+
+        return view('products.top-selling')->with('viewData', $viewData);
     }
 }

@@ -4,17 +4,23 @@
 
 @section('content')
     <h1>{{ $viewData['product']->getName() }}</h1>
+    @if ($viewData['product']->getImage())
+        <img src="{{ asset('storage/'.$viewData['product']->getImage()) }}" alt="{{ $viewData['product']->getName() }}" width="320">
+    @endif
     <p>{{ $viewData['product']->getDescription() }}</p>
-    <p>{{ $viewData['product']->getFormattedPrice() }} — {{ $viewData['product']->brand->getName() }} / {{ $viewData['product']->category->getName() }}</p>
-    <p>Calificación promedio: {{ $viewData['product']->averageRating() }} / 5</p>
+    <p>{{ $viewData['product']->getFormattedPrice() }} — {{ $viewData['product']->getBrand()->getName() }} / {{ $viewData['product']->getCategory()->getName() }}</p>
+    <p>{{ trans_choice('products.units_available', $viewData['product']->getStock()) }}</p>
+    <p>{{ __('products.average_rating', ['rating' => $viewData['product']->averageRating()]) }}</p>
 
     @auth
         <form action="{{ route('orders.checkout') }}" method="POST">
             @csrf
             <input type="hidden" name="items[0][product_id]" value="{{ $viewData['product']->getId() }}">
-            <label>Cantidad</label>
-            <input type="number" name="items[0][quantity]" value="1" min="1">
-            <button type="submit" @disabled(! $viewData['product']->checkAvailability())>Comprar</button>
+            <label>{{ __('products.quantity') }}</label>
+            <input type="number" name="items[0][quantity]" value="{{ old('items.0.quantity', 1) }}" min="1" max="{{ $viewData['product']->getStock() }}">
+            <button type="submit" @disabled(! $viewData['product']->checkAvailability())>{{ __('products.buy') }}</button>
+            @error('stock') <span class="error">{{ $message }}</span> @enderror
+            @error('items.0.quantity') <span class="error">{{ $message }}</span> @enderror
         </form>
 
         <h2>Dejar una reseña</h2>
@@ -28,8 +34,8 @@
         </form>
     @endauth
 
-    <h2>Reseñas ({{ $viewData['product']->reviews->count() }})</h2>
-    @forelse ($viewData['product']->reviews->sortByDesc(fn ($review) => $review->getCreatedAtReview()) as $review)
+    <h2>Reseñas ({{ $viewData['product']->getReviews()->count() }})</h2>
+    @forelse ($viewData['product']->getReviews()->sortByDesc(fn ($review) => $review->getCreatedAtReview()) as $review)
         <div class="review">
             <strong>{{ $review->user->getName() }}</strong>
             <span>{{ str_repeat('★', $review->getRating()) }}{{ str_repeat('☆', 5 - $review->getRating()) }}</span>

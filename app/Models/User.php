@@ -33,6 +33,16 @@ class User extends Authenticatable
         'remember_token',
     ];
 
+    /**
+     * Mirrors the "cliente" default of the role column, so a user that was just
+     * registered already answers isAdmin() without having to be reloaded.
+     *
+     * @var array<string, mixed>
+     */
+    protected $attributes = [
+        'role' => 'cliente',
+    ];
+
     protected function casts(): array
     {
         return [

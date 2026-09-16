@@ -2,12 +2,19 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\RedirectResponse;
+use Illuminate\View\View;
 
 class HomeController extends Controller
 {
-    public function index(): RedirectResponse
+    /**
+     * Landing page of the store. The catalog itself lives in ProductController.
+     */
+    public function index(): View
     {
-        return redirect()->route('products.index');
+        $viewData = [
+            'title' => __('home.title'),
+        ];
+
+        return view('home.index')->with('viewData', $viewData);
     }
 }

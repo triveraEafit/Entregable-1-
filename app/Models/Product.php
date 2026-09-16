@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,9 +13,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * $this->attributes['id'] - int - primary key
  * $this->attributes['name'] - string - name of the product
  * $this->attributes['description'] - string|null - description of the product
- * $this->attributes['price'] - string - price of the product (decimal:2)
+ * $this->attributes['price'] - float - unit price of the product
  * $this->attributes['stock'] - int - units available in stock
- * $this->attributes['image'] - string|null - path to the product image
+ * $this->attributes['image'] - string|null - path to the product image inside the public disk
  * $this->attributes['active'] - bool - whether the product is visible/purchasable
  * $this->attributes['brand_id'] - int - foreign key to brands table
  * $this->attributes['category_id'] - int - foreign key to categories table
@@ -60,7 +61,7 @@ class Product extends Model
         $this->attributes['description'] = $description;
     }
 
-    public function setPrice(string $price): void
+    public function setPrice(float $price): void
     {
         $this->attributes['price'] = $price;
     }
@@ -93,7 +94,7 @@ class Product extends Model
     // Getters
     public function getId(): int
     {
-        return $this->attributes['id'];
+        return (int) $this->attributes['id'];
     }
 
     public function getName(): string
@@ -103,37 +104,37 @@ class Product extends Model
 
     public function getDescription(): ?string
     {
-        return $this->attributes['description'];
+        return $this->attributes['description'] ?? null;
     }
 
-    public function getPrice(): string
+    public function getPrice(): float
     {
-        return $this->attributes['price'];
+        return (float) $this->attributes['price'];
     }
 
     public function getStock(): int
     {
-        return $this->attributes['stock'];
+        return (int) ($this->attributes['stock'] ?? 0);
     }
 
     public function getImage(): ?string
     {
-        return $this->attributes['image'];
+        return $this->attributes['image'] ?? null;
     }
 
     public function getActive(): bool
     {
-        return (bool) $this->attributes['active'];
+        return (bool) ($this->attributes['active'] ?? true);
     }
 
     public function getBrandId(): int
     {
-        return $this->attributes['brand_id'];
+        return (int) $this->attributes['brand_id'];
     }
 
     public function getCategoryId(): int
     {
-        return $this->attributes['category_id'];
+        return (int) $this->attributes['category_id'];
     }
 
     public function getCreatedAt(): string
@@ -152,14 +153,32 @@ class Product extends Model
         return $this->belongsTo(Brand::class);
     }
 
+    public function getBrand(): Brand
+    {
+        return $this->brand;
+    }
+
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
     }
 
+    public function getCategory(): Category
+    {
+        return $this->category;
+    }
+
     public function orderItems(): HasMany
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    /**
+     * @return Collection<int, OrderItem>
+     */
+    public function getOrderItems(): Collection
+    {
+        return $this->orderItems;
     }
 
     public function reviews(): HasMany
@@ -168,21 +187,51 @@ class Product extends Model
     }
 
     /**
-     * Only available when the query used withCount('reviews').
+     * @return Collection<int, Review>
+     */
+    public function getReviews(): Collection
+    {
+        return $this->reviews;
+    }
+
+    /**
+     * Price formatted for the store, calculated from the price attribute.
+     */
+    public function getFormattedPrice(): string
+    {
+        return '$'.number_format($this->getPrice(), 2);
+    }
+
+    /**
+     * Number of reviews calculated by withCount('reviews'). It is 0 when the query did not count them.
      */
     public function getReviewsCount(): int
     {
         return (int) ($this->attributes['reviews_count'] ?? 0);
     }
 
-    public function getFormattedPrice(): string
+    /**
+     * Units sold calculated by withSum() over the order items. It is 0 when the query did not add them.
+     */
+    public function getUnitsSold(): int
     {
-        return '$'.number_format((float) $this->getPrice(), 2);
+        return (int) ($this->attributes['units_sold'] ?? 0);
     }
 
+    /**
+     * Checks that the product is active and has enough units for the requested quantity.
+     */
     public function checkAvailability(int $quantity = 1): bool
     {
         return $this->getActive() && $this->getStock() >= $quantity;
+    }
+
+    /**
+     * Subtracts the sold units with a single "stock = stock - quantity" update.
+     */
+    public function decreaseStock(int $quantity): void
+    {
+        $this->decrement('stock', $quantity);
     }
 
     public function averageRating(): float

@@ -13,6 +13,7 @@ Route::get('/productos', 'App\Http\Controllers\ProductController@index')->name('
 Route::get('/productos/buscar', 'App\Http\Controllers\ProductController@search')->name('products.search');
 Route::get('/productos/filtro', 'App\Http\Controllers\ProductController@filter')->name('products.filter');
 Route::get('/productos/mas-comentados', 'App\Http\Controllers\ProductController@topCommented')->name('products.top-commented');
+Route::get('/productos/mas-vendidos', 'App\Http\Controllers\ProductController@topSelling')->name('products.top-selling');
 Route::get('/productos/{id}', 'App\Http\Controllers\ProductController@show')->name('products.show');
 
 Route::middleware('auth')->group(function () {
@@ -28,6 +29,7 @@ Route::middleware('auth')->group(function () {
 |--------------------------------------------------------------------------
 | Independent views and controllers from the public section.
 | Requires authentication and admin role ('auth' and 'admin' middleware).
+| The group adds the "admin." prefix: 'products.index' is registered as 'admin.products.index'.
 */
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/products', 'App\Http\Controllers\Admin\ProductController@index')->name('products.index');
@@ -35,7 +37,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/products', 'App\Http\Controllers\Admin\ProductController@store')->name('products.store');
     Route::get('/products/{id}/edit', 'App\Http\Controllers\Admin\ProductController@edit')->name('products.edit');
     Route::put('/products/{id}', 'App\Http\Controllers\Admin\ProductController@update')->name('products.update');
-    Route::delete('/products/{id}', 'App\Http\Controllers\Admin\ProductController@destroy')->name('products.destroy');
+    // Products are deactivated instead of deleted, so their order items keep pointing to them.
+    Route::patch('/products/{id}/deactivate', 'App\Http\Controllers\Admin\ProductController@deactivate')->name('products.deactivate');
 
     Route::get('/categories', 'App\Http\Controllers\Admin\CategoryController@index')->name('categories.index');
     Route::get('/categories/create', 'App\Http\Controllers\Admin\CategoryController@create')->name('categories.create');
