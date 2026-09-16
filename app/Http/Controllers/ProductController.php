@@ -12,45 +12,45 @@ class ProductController extends Controller
 {
     public function __construct(
         private readonly ProductRepositoryInterface $products,
+        private readonly CategoryRepositoryInterface $categories,
         private readonly BrandRepositoryInterface $brands,
-        private readonly CategoryRepositoryInterface $categories
     ) {}
 
     public function index(): View
     {
-        $data = [
+        $viewData = [
             'products' => $this->products->paginateActive(),
         ];
 
-        return view('products.index', $data);
+        return view('products.index')->with('viewData', $viewData);
     }
 
     /**
-     * Funcionalidad interesante 1: búsqueda de productos por nombre.
+     * Funcionalidad interesante: búsqueda de productos por nombre.
      */
     public function search(Request $request): View
     {
         $term = (string) $request->query('q', '');
 
-        $data = [
+        $viewData = [
             'products' => $term !== ''
                 ? $this->products->searchByName($term)
                 : $this->products->paginateActive(),
             'term' => $term,
         ];
 
-        return view('products.index', $data);
+        return view('products.index')->with('viewData', $viewData);
     }
 
     /**
-     * Funcionalidad interesante 2: filtro de productos por categoría y/o marca.
+     * Funcionalidad interesante: filtro de productos por categoría y/o marca.
      */
     public function filter(Request $request): View
     {
         $categoryId = $request->query('category_id') ? (int) $request->query('category_id') : null;
         $brandId = $request->query('brand_id') ? (int) $request->query('brand_id') : null;
 
-        $data = [
+        $viewData = [
             'products' => $this->products->filterByCategoryAndBrand($categoryId, $brandId),
             'categories' => $this->categories->all(),
             'brands' => $this->brands->all(),
@@ -58,27 +58,27 @@ class ProductController extends Controller
             'selectedBrandId' => $brandId,
         ];
 
-        return view('products.index', $data);
+        return view('products.index')->with('viewData', $viewData);
     }
 
-    public function show(int $id): View
+    public function show(string $id): View
     {
-        $data = [
-            'product' => $this->products->findWithRelations($id),
+        $viewData = [
+            'product' => $this->products->findWithRelations((int) $id),
         ];
 
-        return view('products.show', $data);
+        return view('products.show')->with('viewData', $viewData);
     }
 
     /**
-     * Funcionalidad interesante 3: top 4 productos más comentados.
+     * Funcionalidad interesante: top 4 productos más comentados.
      */
     public function topCommented(): View
     {
-        $data = [
+        $viewData = [
             'products' => $this->products->topCommented(4),
         ];
 
-        return view('products.top-commented', $data);
+        return view('products.top-commented')->with('viewData', $viewData);
     }
 }
